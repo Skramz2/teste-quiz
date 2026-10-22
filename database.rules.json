@@ -1,0 +1,68 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$room": {
+        ".read": "auth != null && data.child('meta/hostUid').val() === auth.uid",
+        ".write": "auth != null && (data.child('meta/hostUid').val() === auth.uid || (!data.exists() && newData.child('meta/hostUid').val() === auth.uid))",
+        ".validate": "$room.matches(/^[A-Z0-9]{4,8}$/)",
+
+        "meta": {
+          ".read": "auth != null"
+        },
+        "state": {
+          ".read": "auth != null"
+        },
+        "scores": {
+          ".read": "auth != null"
+        },
+
+        "players": {
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms/' + $room + '/meta/hostUid').exists()",
+            ".validate": "newData.hasChildren(['name', 'joinedAt'])",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
+            },
+            "joinedAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+
+        "presence": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms/' + $room + '/meta/hostUid').exists()",
+            ".validate": "newData.isBoolean()"
+          }
+        },
+
+        "answers": {
+          "$qk": {
+            "$uid": {
+              ".read": "auth != null && auth.uid === $uid",
+              ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/' + $room + '/players/' + $uid).exists() && root.child('rooms/' + $room + '/state/phase').val() === 'question' && root.child('rooms/' + $room + '/state/qKey').val() === $qk && newData.child('t').val() <= root.child('rooms/' + $room + '/state/endsAt').val() + 2000",
+              ".validate": "newData.hasChildren(['c', 't']) && newData.child('c').isNumber() && newData.child('c').val() >= 0 && newData.child('c').val() <= 3 && newData.child('t').val() === now",
+              "c": { ".validate": "newData.isNumber()" },
+              "t": { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            }
+          }
+        },
+
+        "results": {
+          "$qk": {
+            "$uid": {
+              ".read": "auth != null && auth.uid === $uid"
+            }
+          }
+        }
+      }
+    }
+  }
+}

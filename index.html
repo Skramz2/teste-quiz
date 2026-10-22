@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QuizIA – Quiz ao vivo sobre Inteligência Artificial</title>
+<meta name="theme-color" content="#0e0f2e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#0e0f2e;--ink:#f5f6ff;--mut:#a9acd6;--line:rgba(255,255,255,.14);--panel:rgba(255,255,255,.07);
+--a:#ff4d79;--b:#3b82f6;--c:#ffb020;--d:#14c99a;--brand:#7c5cff;--cyan:#22d3ee}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:Figtree,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:
+radial-gradient(1100px 650px at 8% -10%,rgba(124,92,255,.35),transparent 60%),
+radial-gradient(900px 600px at 100% 0,rgba(34,211,238,.22),transparent 55%),var(--bg);background-attachment:fixed;
+line-height:1.45;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.disp{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif;font-weight:800;letter-spacing:-.02em;margin:0}
+p{margin:.3em 0}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+.hidden{display:none!important}
+#app{min-height:100vh}
+.brand{display:flex;align-items:center;gap:.6rem;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.5rem}
+.brand svg{width:2.2rem;height:2.2rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:1.4rem;backdrop-filter:blur(8px)}
+.btn{border:0;cursor:pointer;border-radius:14px;padding:.85rem 1.3rem;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--brand),#5b3df0);
+box-shadow:0 8px 22px rgba(91,61,240,.4);transition:transform .15s,filter .15s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn.big{font-size:1.25rem;padding:1rem 1.8rem}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);box-shadow:none}
+.btn.green{background:linear-gradient(135deg,#14c99a,#0ea57d);box-shadow:0 8px 22px rgba(20,201,154,.35)}
+.btn.red{background:linear-gradient(135deg,#ff4d79,#e0305c);box-shadow:0 8px 22px rgba(255,77,121,.35)}
+input[type=text],input[type=number]{width:100%;padding:.9rem 1rem;border-radius:14px;border:1.5px solid var(--line);background:rgba(0,0,0,.25);font-size:1.1rem}
+input::placeholder{color:#7f83b5}
+label{display:block;font-weight:700;margin:.9rem 0 .35rem;color:var(--mut)}
+.err{color:#ff8fa8;font-weight:600;min-height:1.4em}
+.pill{display:inline-block;padding:.35rem .9rem;border-radius:99px;background:rgba(255,255,255,.1);font-weight:700}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#14163f;padding:.8rem 1.2rem;border-radius:14px;font-weight:700;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+
+/* Início */
+.home{max-width:980px;margin:0 auto;padding:clamp(1rem,4vw,3rem)}
+.hero{text-align:center;margin:2rem 0 2.2rem}
+.hero .brand{justify-content:center;font-size:clamp(2.4rem,7vw,4rem)}
+.hero .brand svg{width:clamp(3rem,8vw,4.6rem);height:clamp(3rem,8vw,4.6rem)}
+.hero p{color:var(--mut);font-size:1.15rem}
+.homegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.2rem}
+.homegrid h2{margin-bottom:.4rem}
+.homegrid .btn{width:100%;margin-top:1.1rem}
+#codeIn{text-transform:uppercase;letter-spacing:.25em;font-weight:800;text-align:center;font-size:1.4rem}
+
+/* Apresentador */
+.host{max-width:1700px;margin:0 auto;padding:clamp(.8rem,2vw,1.8rem)}
+.htop{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.htop .right{display:flex;gap:.6rem;align-items:center}
+.hgrid{display:grid;grid-template-columns:minmax(340px,5fr) 7fr;gap:1.4rem}
+.codebig{display:flex;gap:.5rem;justify-content:center;margin:.8rem 0}
+.codebig span{width:clamp(2.6rem,4.4vw,4.4rem);height:clamp(3.4rem,5.6vw,5.6rem);display:grid;place-items:center;border-radius:14px;
+font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(1.8rem,3.4vw,3.4rem);color:#fff;animation:pop .5s both}
+.codebig span:nth-child(4n+1){background:var(--a)}.codebig span:nth-child(4n+2){background:var(--b)}
+.codebig span:nth-child(4n+3){background:var(--c);color:#2b1d00}.codebig span:nth-child(4n){background:var(--d);color:#04322a}
+.codebig span:nth-child(2){animation-delay:.07s}.codebig span:nth-child(3){animation-delay:.14s}.codebig span:nth-child(4){animation-delay:.21s}.codebig span:nth-child(5){animation-delay:.28s}
+.qrbox{background:#fff;border-radius:18px;padding:14px;width:fit-content;margin:1rem auto}
+.qrbox img,.qrbox canvas{display:block}
+.linkrow{display:flex;gap:.6rem;margin-top:.8rem}
+.linkrow input{flex:1;font-size:.95rem}
+.phead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.8rem}
+.count b{font-size:2rem;font-family:"Bricolage Grotesque",sans-serif}
+.chips{display:flex;flex-wrap:wrap;gap:.6rem;min-height:120px;align-content:flex-start}
+.chip{padding:.45rem .9rem;border-radius:99px;background:rgba(255,255,255,.12);font-weight:700;font-size:1.1rem;display:flex;gap:.45rem;align-items:center;animation:pop .35s both}
+.chip i{width:.6rem;height:.6rem;border-radius:50%;background:var(--d)}
+.chip.off{opacity:.45}.chip.off i{background:#888}
+.startbar{display:flex;gap:1rem;align-items:center;justify-content:space-between;margin-top:1.4rem;flex-wrap:wrap}
+.startbar label{margin:0;display:flex;align-items:center;gap:.6rem}
+.startbar input{width:90px;text-align:center}
+.qlayout{display:grid;grid-template-columns:minmax(0,8fr) minmax(280px,3fr);gap:1.4rem}
+.qtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+.timer{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(2.4rem,4vw,4rem);min-width:4.2rem;text-align:center;
+border-radius:50%;border:5px solid var(--cyan);aspect-ratio:1;display:grid;place-items:center;line-height:1}
+.timer.warn{border-color:var(--a);color:var(--a);animation:beat .8s infinite}
+.tbar{height:10px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden;margin-bottom:1.2rem}
+.tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--cyan),var(--brand));transition:width .25s linear}
+.qtext{font-size:clamp(1.6rem,3vw,3rem);line-height:1.15;margin-bottom:1.3rem}
+.ogrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.tile{position:relative;overflow:hidden;border-radius:18px;padding:1.1rem 1.2rem;min-height:clamp(84px,11vh,130px);display:flex;align-items:center;gap:.9rem;
+font-size:clamp(1.05rem,1.7vw,1.7rem);font-weight:700;color:#fff;background:var(--oc);transition:opacity .4s,transform .4s}
+.tile .let{flex:none;width:2.3em;height:2.3em;border-radius:50%;background:rgba(0,0,0,.25);display:grid;place-items:center;font-family:"Bricolage Grotesque",sans-serif;font-weight:800}
+.tile .otxt{position:relative;z-index:1;flex:1}
+.tile .cnt{position:relative;z-index:1;font-family:"Bricolage Grotesque",sans-serif;font-size:1.6em}
+.tile .fill{position:absolute;left:0;bottom:0;height:7px;background:rgba(255,255,255,.85);width:0;transition:width .6s}
+.o0{--oc:#e63e68}.o1{--oc:#2f6fe0}.o2{--oc:#d98a00}.o3{--oc:#0fa67f}
+.tile.dim{opacity:.3}.tile.right{outline:5px solid #fff;transform:scale(1.02)}
+.expl{margin-top:1.1rem;padding:1rem 1.3rem;border-left:6px solid var(--d);background:rgba(20,201,154,.12);border-radius:0 14px 14px 0;font-size:clamp(1rem,1.5vw,1.4rem)}
+.controls{display:flex;gap:1rem;align-items:center;margin-top:1.3rem;flex-wrap:wrap}
+.controls label{margin:0;display:flex;align-items:center;gap:.6rem}
+.controls input{width:90px;text-align:center}
+.side h3{margin-bottom:.6rem}
+.rank{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.rank li{display:flex;gap:.7rem;align-items:center;padding:.55rem .8rem;border-radius:12px;background:rgba(255,255,255,.08);font-weight:700}
+.rank li b{margin-left:auto;font-family:"Bricolage Grotesque",sans-serif}
+.rank .pos{width:1.8rem;height:1.8rem;border-radius:50%;background:var(--brand);display:grid;place-items:center;font-size:.9rem;flex:none}
+.bignum{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:2.6rem}
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:1rem;margin:2rem 0 1rem;min-height:340px}
+.pcol{width:min(26vw,280px);text-align:center}
+.pcol .nm{font-weight:800;font-size:clamp(1.1rem,2vw,2rem);word-break:break-word;margin-bottom:.4rem}
+.pcol .bar{border-radius:16px 16px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:.8rem;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:2.6rem;animation:rise .9s both}
+.pcol.p1 .bar{height:260px;background:linear-gradient(#ffd04d,#d98a00);color:#3a2600;animation-delay:.5s}
+.pcol.p2 .bar{height:190px;background:linear-gradient(#d9deea,#8d97b0);color:#1f2540;animation-delay:.25s}
+.pcol.p3 .bar{height:140px;background:linear-gradient(#e0a070,#a05a2c);color:#2d1300}
+.pcol small{font-size:1.1rem;font-family:Figtree,sans-serif;font-weight:700;opacity:.85}
+
+/* Participante */
+.pl{max-width:560px;margin:0 auto;padding:max(1rem,env(safe-area-inset-top)) 1rem max(1rem,env(safe-area-inset-bottom));min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;gap:.9rem}
+.pl .ptop{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.pl .ptop .nick{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl .pq{font-size:1.25rem;font-weight:700;line-height:1.25}
+.pl .ogrid{grid-template-columns:1fr;flex:1;grid-auto-rows:minmax(78px,1fr)}
+.pl .tile{cursor:pointer;border:0;text-align:left;font-size:1.15rem;width:100%;box-shadow:0 6px 0 rgba(0,0,0,.28);transition:transform .08s}
+.pl .tile:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.pl .tile:disabled{cursor:default}
+.pl .tile.picked{outline:5px solid #fff}
+.center{margin:auto;text-align:center}
+.center .em{font-size:4rem;animation:pop .5s both}
+.center h2{font-size:1.9rem;margin:.4rem 0}
+.dots span{display:inline-block;width:.7rem;height:.7rem;margin:0 .2rem;border-radius:50%;background:var(--cyan);animation:blink 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+.res{padding:1.2rem;border-radius:20px;text-align:center;margin-bottom:.3rem}
+.res.ok{background:rgba(20,201,154,.2);border:2px solid var(--d)}
+.res.no{background:rgba(255,77,121,.18);border:2px solid var(--a)}
+.res .pts{font-family:"Bricolage Grotesque",sans-serif;font-size:2.6rem;font-weight:800}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes rise{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}
+@keyframes beat{50%{transform:scale(1.08)}}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+@media (max-width:900px){.hgrid,.qlayout{grid-template-columns:1fr}.ogrid{grid-template-columns:1fr}.pcol{width:30vw}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"><div class="center" style="padding-top:30vh;text-align:center"><p>Carregando QuizIA…</p></div></div>
+<script>
+/* Se o JavaScript do Firebase não carregar em 10 s, avisa o usuário. */
+setTimeout(function(){if(!window.__quizia_ok){document.getElementById('app').innerHTML='<div style="max-width:560px;margin:20vh auto;padding:1rem;text-align:center"><h2>Não foi possível iniciar</h2><p>Verifique sua conexão com a internet e abra o site pelo endereço publicado (https://...), não pelo arquivo no computador.</p></div>';}},10000);
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, set, get, update, onValue, serverTimestamp, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+/* =====================================================================
+   1) CONFIGURAÇÃO DO FIREBASE  –  COLE AQUI OS SEUS VALORES (veja o LEIA-ME.md)
+   Esta configuração é pública por natureza; quem protege os dados são
+   as regras do arquivo database.rules.json.
+   ===================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAnhCZaEvFM7yUvds2Poa2kotda1Nn-p7Q",
+  authDomain: "teste-quiz-278ca.firebaseapp.com",
+  databaseURL: "https://teste-quiz-278ca-default-rtdb.firebaseio.com",
+  projectId: "teste-quiz-278ca",
+  storageBucket: "teste-quiz-278ca.firebasestorage.app",
+  messagingSenderId: "299246352065",
+  appId: "1:299246352065:web:48401124722017c9b94640"
+};
+
+/* =====================================================================
+   2) PERGUNTAS  –  "correct" é a posição da resposta certa (0=A, 1=B, 2=C, 3=D)
+   ===================================================================== */
+const QUIZ = [
+  { text: "O que melhor descreve a inteligência artificial?",
+    options: ["Robôs que têm consciência e sentimentos próprios", "Sistemas de computador que realizam tarefas que normalmente exigem inteligência humana, como reconhecer padrões ou linguagem", "Qualquer programa que precise de internet para funcionar", "Um banco de dados muito grande com todas as respostas"],
+    correct: 1, time: 20, explain: "IA é um conjunto de técnicas para fazer máquinas executarem tarefas como entender linguagem, reconhecer imagens e tomar decisões. Ela não tem consciência." },
+  { text: "Como um modelo de aprendizado de máquina (machine learning) costuma aprender?",
+    options: ["Ajustando seus parâmetros a partir de muitos exemplos de dados", "Seguindo uma regra escrita à mão para cada situação possível", "Lendo o manual de instruções do usuário", "Copiando o código de outros programas instalados"],
+    correct: 0, time: 20, explain: "No aprendizado de máquina, o modelo encontra padrões nos dados de exemplo e ajusta seus parâmetros para errar menos." },
+  { text: "O que uma IA generativa faz?",
+    options: ["Apenas procura páginas prontas na internet e copia o conteúdo", "Só organiza planilhas e bancos de dados já existentes", "Cria conteúdo novo, como texto, imagens, áudio ou código, a partir do que aprendeu", "Deixa o computador mais rápido trocando peças de hardware"],
+    correct: 2, time: 20, explain: "Modelos generativos produzem conteúdo inédito a partir de padrões aprendidos no treinamento." },
+  { text: "O que é uma “alucinação” em um modelo de linguagem?",
+    options: ["Quando o servidor fica sem energia", "Quando o usuário digita a pergunta com erros", "Quando a IA se recusa a responder", "Uma resposta que parece confiante e plausível, mas contém informações falsas ou inventadas"],
+    correct: 3, time: 25, explain: "Modelos geram texto provável, não necessariamente verdadeiro. Por isso podem inventar fatos, citações e fontes." },
+  { text: "De onde pode vir o viés (preconceito) em um sistema de IA?",
+    options: ["Por ser matemática, a IA é sempre neutra e nunca tem viés", "Dos dados de treinamento e das decisões de projeto, que podem refletir desigualdades", "Somente do tamanho da tela do aparelho", "Apenas de erros de conexão do usuário"],
+    correct: 1, time: 25, explain: "Se os dados ou os critérios do projeto carregam distorções, o modelo tende a reproduzi-las ou amplificá-las." },
+  { text: "Qual cuidado de privacidade é importante ao usar um chatbot de IA público?",
+    options: ["Não inserir dados pessoais, sensíveis ou confidenciais sem saber como serão tratados", "Colar documentos internos completos para obter respostas melhores", "Informar senhas para o chatbot lembrar delas", "Nenhum, porque toda conversa é anônima e apagada na hora"],
+    correct: 0, time: 25, explain: "O que você digita pode ser armazenado ou usado conforme a política do serviço. Evite dados pessoais, senhas e segredos da empresa." },
+  { text: "Uma IA gerou uma estatística surpreendente. O que fazer antes de divulgá-la?",
+    options: ["Divulgar logo, pois a IA tem acesso a tudo", "Perguntar à própria IA se ela tem certeza e aceitar o “sim”", "Conferir em fontes confiáveis e, se possível, nos dados originais", "Confiar se o texto estiver bem escrito e com tom seguro"],
+    correct: 2, time: 25, explain: "Texto fluente não prova veracidade. Verifique em fontes independentes e confiáveis antes de compartilhar." },
+  { text: "Ao programar com ajuda de IA, qual prática é recomendada?",
+    options: ["Colar o código em produção sem ler, para ganhar tempo", "Confiar, pois a IA nunca erra segurança ou lógica", "Incluir chaves de API e senhas no prompt para o código funcionar", "Revisar, testar e entender o código gerado antes de usá-lo"],
+    correct: 3, time: 25, explain: "A IA acelera o trabalho, mas pode errar. A responsabilidade continua sendo de quem usa: leia, teste e nunca exponha segredos." }
+];
+
+/* ===================== Utilidades ===================== */
+const $ = id => document.getElementById(id);
+const app = $('app');
+const LETTERS = ['A','B','C','D'];
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (n,a,b) => Math.min(Math.max(n,a),b);
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } };
+const lsSet = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+const LOGO = `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect width="48" height="48" rx="14" fill="url(#lg)"/><g stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M14 14L24 24M34 12L24 24M12 33L24 24M35 34L24 24"/></g><circle cx="24" cy="24" r="5.5" fill="#fff"/><circle cx="14" cy="14" r="3.4" fill="#ff4d79"/><circle cx="34" cy="12" r="3.4" fill="#ffb020"/><circle cx="12" cy="33" r="3.4" fill="#14c99a"/><circle cx="35" cy="34" r="3.4" fill="#3b82f6"/></svg>`;
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3500); }
+function fatal(title, msg){ app.innerHTML = `<div style="max-width:620px;margin:12vh auto;padding:1rem"><div class="panel"><h2>${esc(title)}</h2><p style="margin-top:.8rem">${msg}</p></div></div>`; }
+function ranking(scores){
+  const arr = Object.entries(scores||{}).map(([id,v]) => ({id, name:v.name||'?', score:v.score||0}))
+    .sort((a,b) => b.score-a.score || a.name.localeCompare(b.name));
+  let r=0, prev=null; arr.forEach((p,i) => { if(p.score!==prev){ r=i+1; prev=p.score; } p.rank=r; });
+  return arr;
+}
+
+/* ===================== Firebase ===================== */
+if (Object.values(firebaseConfig).some(v => !v || String(v).includes('COLE_AQUI'))) {
+  window.__quizia_ok = true;
+  fatal('Falta configurar o Firebase', 'Abra o arquivo <b>index.html</b> e substitua os valores <code>COLE_AQUI…</code> dentro de <code>firebaseConfig</code> pelos dados do seu projeto. O passo a passo está no <b>LEIA-ME.md</b>.');
+  throw new Error('firebaseConfig não preenchido');
+}
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getDatabase(fbApp);
+let uid = null, offset = 0;
+const now = () => Date.now() + offset;
+onValue(ref(db, '.info/serverTimeOffset'), s => { offset = s.val() || 0; });
+
+try {
+  let user = await new Promise(res => { const un = onAuthStateChanged(auth, u => { un(); res(u); }); });
+  if (!user) user = (await signInAnonymously(auth)).user;
+  uid = user.uid;
+} catch (e) {
+  window.__quizia_ok = true;
+  const hint = (e.code === 'auth/operation-not-allowed' || e.code === 'auth/admin-restricted-operation')
+    ? 'O login <b>Anônimo</b> não está ativado. No Firebase: Authentication → Método de login → Anônimo → Ativar.'
+    : 'Confira os valores de <code>firebaseConfig</code> e se o domínio do site está em “Domínios autorizados”.';
+  fatal('Não foi possível entrar no Firebase', `${hint}<br><small>${esc(e.code || e.message)}</small>`);
+  throw e;
+}
+window.__quizia_ok = true;
+
+/* ===================== Estado global ===================== */
+let H = null;   // apresentador
+let P = null;   // participante
+
+/* ===================== Tela inicial ===================== */
+async function renderHome(){
+  const pre = (new URLSearchParams(location.search).get('sala') || '').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+  const sv = lsGet('quizia_player');
+  if (sv && sv.code && (!pre || pre === sv.code)) {
+    try { const s = await get(ref(db, `rooms/${sv.code}/players/${uid}`)); if (s.exists()) return startPlayer(sv.code, s.val().name); } catch(e){}
+  }
+  let resume = null;
+  const hs = lsGet('quizia_host');
+  if (hs && hs.code && !pre) {
+    try { const m = await get(ref(db, `rooms/${hs.code}/meta/hostUid`)); if (m.val() === uid) resume = hs.code; } catch(e){}
+  }
+  app.innerHTML = `<main class="home">
+    <div class="hero"><div class="brand">${LOGO}<span>QuizIA</span></div><p>Quiz ao vivo sobre inteligência artificial. Todo mundo joga pelo celular.</p></div>
+    <div class="homegrid">
+      <section class="panel"><h2>Entrar em uma sala</h2>
+        <label for="codeIn">Código da sala</label><input id="codeIn" type="text" maxlength="8" autocomplete="off" autocapitalize="characters" placeholder="ABC12" value="${esc(pre)}">
+        <label for="nickIn">Seu apelido</label><input id="nickIn" type="text" maxlength="20" autocomplete="off" placeholder="Como quer aparecer?" value="${esc((sv&&sv.name)||'')}">
+        <button id="joinBtn" class="btn">Entrar no jogo</button><p id="joinErr" class="err"></p></section>
+      ${pre ? '' : `<section class="panel"><h2>Apresentar um quiz</h2><p style="color:var(--mut)">Crie uma sala, mostre o QR code no projetor e conduza as ${QUIZ.length} perguntas.</p>
+        <button id="createBtn" class="btn green">Criar sala</button>
+        ${resume ? `<button id="resumeBtn" class="btn ghost">Retomar sala ${esc(resume)}</button>` : ''}<p id="createErr" class="err"></p></section>`}
+    </div></main>`;
+  if (pre) $('nickIn').focus();
+  $('joinBtn').onclick = async () => {
+    const code = $('codeIn').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    const name = $('nickIn').value.trim();
+    const err = $('joinErr'); err.textContent = '';
+    if (code.length < 4) return err.textContent = 'Digite o código da sala.';
+    if (!name) return err.textContent = 'Digite um apelido.';
+    $('joinBtn').disabled = true;
+    try {
+      const m = await get(ref(db, `rooms/${code}/meta/hostUid`));
+      if (!m.exists()) { err.textContent = 'Sala não encontrada. Confira o código.'; $('joinBtn').disabled = false; return; }
+      await set(ref(db, `rooms/${code}/players/${uid}`), { name, joinedAt: serverTimestamp() });
+      startPlayer(code, name);
+    } catch(e) { err.textContent = 'Não foi possível entrar: ' + (e.code || e.message); $('joinBtn').disabled = false; }
+  };
+  if ($('createBtn')) $('createBtn').onclick = createRoom;
+  if ($('resumeBtn')) $('resumeBtn').onclick = () => startHost(resume);
+}
+
+/* ===================== APRESENTADOR ===================== */
+async function createRoom(){
+  const btn = $('createBtn'); btn.disabled = true; $('createErr').textContent = '';
+  const keys = {};
+  QUIZ.forEach((q,i) => { keys['q'+i] = { c: q.correct, e: q.explain }; });   // gabarito privado (só o apresentador lê)
+  try {
+    for (let n = 0; n < 10; n++) {
+      let code = ''; for (let i = 0; i < 5; i++) code += CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)];
+      if ((await get(ref(db, `rooms/${code}/meta/hostUid`))).exists()) continue;
+      try {
+        await set(ref(db, `rooms/${code}`), {
+          meta: { hostUid: uid, createdAt: serverTimestamp(), total: QUIZ.length },
+          state: { phase: 'lobby', qIndex: -1, total: QUIZ.length },
+          keys
+        });
+        return startHost(code);
+      } catch(e) { if (e.code !== 'PERMISSION_DENIED' && !String(e.message).includes('PERMISSION_DENIED')) throw e; }
+    }
+    throw new Error('Não consegui gerar um código livre. Tente de novo.');
+  } catch(e) {
+    $('createErr').textContent = 'Erro ao criar sala: ' + (e.code || e.message) + ' (confira as regras do banco).';
+    btn.disabled = false;
+  }
+}
+
+function startHost(code){
+  H = { code, state: null, players: {}, presence: {}, scores: {}, answers: {}, ansKey: null, ansUn: null, closing: false, times: {},
+        link: location.href.split('#')[0].split('?')[0] + '?sala=' + code };
+  lsSet('quizia_host', { code });
+  const R = p => ref(db, `rooms/${code}/${p}`);
+  onValue(R('state'), s => {
+    const prev = H.state && H.state.phase;
+    H.state = s.val() || { phase: 'lobby', qIndex: -1, total: QUIZ.length };
+    if (H.state.phase !== 'question') H.closing = false;
+    if ((H.state.qKey || null) !== H.ansKey) {
+      if (H.ansUn) H.ansUn();
+      H.ansKey = H.state.qKey || null; H.answers = {};
+      H.ansUn = H.ansKey ? onValue(R('answers/' + H.ansKey), a => { H.answers = a.val() || {}; fillAnswered(); fillBars(); }) : null;
+    }
+    renderHost();
+  });
+  onValue(R('players'), s => { H.players = s.val() || {}; fillPlayers(); fillAnswered(); });
+  onValue(R('presence'), s => { H.presence = s.val() || {}; fillPlayers(); });
+  onValue(R('scores'), s => { H.scores = s.val() || {}; fillRank(); if (H.state && H.state.phase === 'final') renderHost(); });
+  renderHost();
+}
+
+function nextIndex(){ const st = H.state; return (st && st.qIndex != null ? st.qIndex : -1) + 1; }
+function timeBox(idx){
+  const q = QUIZ[idx]; const v = H.times[idx] || q.time;
+  return `<label>Tempo da pergunta ${idx+1}<input id="timeIn" type="number" min="5" max="180" value="${v}"> s</label>`;
+}
+function readTime(idx){ const v = clamp(parseInt(($('timeIn')||{}).value,10) || QUIZ[idx].time, 5, 180); H.times[idx] = v; return v; }
+
+function renderHost(){
+  if (!H || !H.state) return;
+  const st = H.state, ph = st.phase;
+  const top = `<div class="htop"><div class="brand">${LOGO}<span>QuizIA</span></div>
+    <div class="right"><span class="pill">Sala <b>${esc(H.code)}</b></span><button id="resetBtn" class="btn ghost">Reiniciar partida</button></div></div>`;
+  let body = '';
+  if (ph === 'lobby') {
+    const idx = nextIndex();
+    body = `<div class="hgrid">
+      <section class="panel" style="text-align:center"><h2>Entre pelo celular</h2>
+        <p style="color:var(--mut)">Aponte a câmera para o QR code ou abra o link e digite o código</p>
+        <div class="qrbox"><div id="qr"></div></div>
+        <div class="codebig">${[...H.code].map(c=>`<span>${esc(c)}</span>`).join('')}</div>
+        <div class="linkrow"><input id="linkTxt" type="text" readonly value="${esc(H.link)}" aria-label="Link da sala"><button id="copyBtn" class="btn">Copiar link</button></div></section>
+      <section class="panel"><div class="phead"><h2>Jogadores</h2><span class="count"><b id="hCount">0</b> conectados</span></div>
+        <div id="hPlayers" class="chips"></div>
+        <div class="startbar">${timeBox(idx)}<button id="startBtn" class="btn big green">Iniciar quiz</button></div></section></div>`;
+  } else if (ph === 'final') {
+    const rk = ranking(H.scores), tp = rk.slice(0,3);
+    const col = (p,cls) => p ? `<div class="pcol ${cls}"><div class="nm">${esc(p.name)}</div><div class="bar">${p.rank}º<small>${p.score} pts</small></div></div>` : '';
+    body = `<section class="panel" style="text-align:center"><h1 style="font-size:clamp(2rem,4vw,3.6rem)">Pódio final</h1>
+      ${rk.length ? `<div class="podium">${col(tp[1],'p2')}${col(tp[0],'p1')}${col(tp[2],'p3')}</div>` : '<p>Nenhum jogador pontuou.</p>'}
+      ${rk.length > 3 ? `<ul class="rank" style="max-width:560px;margin:0 auto;text-align:left">${rk.slice(3).map(p=>`<li><span class="pos">${p.rank}</span>${esc(p.name)}<b>${p.score}</b></li>`).join('')}</ul>` : ''}
+      <div class="controls" style="justify-content:center"><button id="resetBtn2" class="btn big">Jogar de novo</button></div></section>`;
+  } else {
+    const q = st.question, rv = st.reveal;
+    const tiles = q.options.map((o,i) => `<div class="tile o${i}${rv ? (i === rv.c ? ' right' : ' dim') : ''}"><span class="let">${LETTERS[i]}</span><span class="otxt">${esc(o)}</span><span class="cnt" id="cnt${i}"></span><i class="fill" id="fill${i}"></i></div>`).join('');
+    let ctr = '';
+    if (ph === 'question') ctr = `<button id="closeBtn" class="btn big red">Encerrar rodada</button>`;
+    else if (ph === 'closed') ctr = `<button id="revealBtn" class="btn big green">Revelar resposta</button>`;
+    else { const n = nextIndex(); ctr = n < QUIZ.length ? `${timeBox(n)}<button id="nextBtn" class="btn big">Próxima pergunta</button>` : `<button id="finalBtn" class="btn big green">Ver pódio</button>`; }
+    body = `<div class="qlayout"><section>
+      <div class="qtop"><span class="pill">Pergunta ${st.qIndex+1} de ${st.total}</span><div class="timer" id="hTimer">${ph==='question'?st.duration:'⏱'}</div></div>
+      <div class="tbar"><i id="hTbar" style="width:${ph==='question'?100:0}%"></i></div>
+      <h1 class="qtext">${esc(q.text)}</h1><div class="ogrid">${tiles}</div>
+      ${rv ? `<div class="expl"><b>Resposta certa: ${LETTERS[rv.c]}.</b> ${esc(rv.e)}</div>` : ''}
+      <div class="controls">${ctr}</div></section>
+      <aside class="panel side"><h3>Respostas</h3><div id="hAnswered" class="bignum">0</div><p style="color:var(--mut);margin-bottom:1.2rem">jogadores que responderam</p>
+      <h3>Ranking</h3><ol id="hRank" class="rank"></ol></aside></div>`;
+  }
+  app.innerHTML = `<div class="host">${top}${body}</div>`;
+  const on = (id, fn) => { const e = $(id); if (e) e.onclick = fn; };
+  on('resetBtn', resetGame); on('resetBtn2', resetGame);
+  on('copyBtn', copyLink); on('startBtn', () => startQuestion(nextIndex()));
+  on('nextBtn', () => startQuestion(nextIndex())); on('closeBtn', closeRound);
+  on('revealBtn', revealAnswer); on('finalBtn', () => update(ref(db, `rooms/${H.code}/state`), { phase: 'final' }));
+  if (ph === 'lobby') makeQR();
+  fillPlayers(); fillAnswered(); fillBars(); fillRank();
+}
+
+function makeQR(){
+  const box = $('qr'); if (!box) return;
+  if (typeof QRCode === 'undefined') { box.textContent = 'QR indisponível: use o link abaixo.'; return; }
+  new QRCode(box, { text: H.link, width: 230, height: 230, colorDark: '#0e0f2e', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+}
+async function copyLink(){
+  try { await navigator.clipboard.writeText(H.link); toast('Link copiado!'); }
+  catch(e) { const i = $('linkTxt'); i.select(); document.execCommand('copy'); toast('Link copiado!'); }
+}
+function fillPlayers(){
+  if (!H) return;
+  const ids = Object.keys(H.players);
+  const online = ids.filter(i => H.presence[i]).length;
+  if ($('hCount')) $('hCount').textContent = online;
+  const box = $('hPlayers'); if (!box) return;
+  box.innerHTML = ids.length ? ids.sort((a,b)=>(H.players[a].name||'').localeCompare(H.players[b].name||''))
+    .map(i => `<span class="chip${H.presence[i]?'':' off'}"><i></i>${esc(H.players[i].name)}</span>`).join('')
+    : '<p style="color:var(--mut)">Aguardando jogadores…</p>';
+}
+function answeredCount(){ return Object.keys(H.answers).filter(i => H.players[i]).length; }
+function fillAnswered(){
+  const e = $('hAnswered'); if (!e || !H) return;
+  e.textContent = `${answeredCount()} / ${Object.keys(H.players).length}`;
+}
+function currentDist(){
+  if (H.state.reveal) return H.state.reveal.dist || [0,0,0,0];
+  const d = [0,0,0,0]; Object.entries(H.answers).forEach(([i,a]) => { if (H.players[i] && a.c >= 0 && a.c <= 3) d[a.c]++; }); return d;
+}
+function fillBars(){
+  if (!H || !H.state || !H.state.question || H.state.phase === 'question') return;
+  const d = currentDist(), tot = Math.max(1, d.reduce((a,b)=>a+b,0));
+  d.forEach((n,i) => { if ($('cnt'+i)) { $('cnt'+i).textContent = n; $('fill'+i).style.width = (n/tot*100) + '%'; } });
+}
+function fillRank(){
+  const e = $('hRank'); if (!e || !H) return;
+  const rk = ranking(H.scores).slice(0,5);
+  e.innerHTML = rk.length ? rk.map(p => `<li><span class="pos">${p.rank}</span>${esc(p.name)}<b>${p.score}</b></li>`).join('') : '<li style="color:var(--mut)">O ranking aparece após a primeira revelação.</li>';
+}
+
+async function startQuestion(i){
+  if (i >= QUIZ.length) return;
+  const q = QUIZ[i], dur = readTime(i), start = now();
+  try {
+    await set(ref(db, `rooms/${H.code}/state`), {
+      phase: 'question', qIndex: i, qKey: 'q' + i, total: QUIZ.length, startedAt: start, endsAt: start + dur*1000, duration: dur,
+      question: { text: q.text, options: q.options }          // sem a resposta certa
+    });
+  } catch(e) { toast('Erro ao iniciar: ' + (e.code || e.message)); }
+}
+async function closeRound(){
+  if (!H || H.state.phase !== 'question') return;
+  try { await update(ref(db, `rooms/${H.code}/state`), { phase: 'closed' }); } catch(e) { toast('Erro: ' + (e.code || e.message)); }
+}
+async function revealAnswer(){
+  const st = H.state; if (st.phase !== 'closed') return;
+  $('revealBtn').disabled = true;
+  const k = st.qKey, B = `rooms/${H.code}/`;
+  try {
+    const [ks, as, rs, ss] = await Promise.all([get(ref(db, B+'keys/'+k)), get(ref(db, B+'answers/'+k)), get(ref(db, B+'results/'+k)), get(ref(db, B+'scores'))]);
+    const key = ks.val(), answers = as.val() || {}, prevRes = rs.val() || {}, scores = ss.val() || {};
+    const dist = [0,0,0,0], upd = {}; let answered = 0;
+    for (const [id, pl] of Object.entries(H.players)) {
+      const a = answers[id]; let pts = 0, ok = false, c = -1;
+      if (a && a.c >= 0 && a.c <= 3) {
+        c = a.c; dist[c]++; answered++;
+        if (c === key.c) { ok = true; const el = clamp(a.t - st.startedAt, 0, st.duration*1000); pts = Math.round(1000 * (1 - 0.5 * el / (st.duration*1000))); }
+      }
+      const base = ((scores[id] && scores[id].score) || 0) - ((prevRes[id] && prevRes[id].pts) || 0);   // evita somar duas vezes
+      upd['results/'+k+'/'+id] = { c, ok, pts };
+      upd['scores/'+id] = { name: pl.name, score: base + pts };
+    }
+    upd['state/reveal'] = { c: key.c, e: key.e, dist, answered };
+    upd['state/phase'] = 'revealed';
+    await update(ref(db, `rooms/${H.code}`), upd);
+  } catch(e) { toast('Erro ao revelar: ' + (e.code || e.message)); const b = $('revealBtn'); if (b) b.disabled = false; }
+}
+async function resetGame(){
+  if (!confirm('Reiniciar a partida? Pontuações e respostas serão apagadas (os jogadores continuam na sala).')) return;
+  try { await update(ref(db, `rooms/${H.code}`), { answers: null, results: null, scores: null, state: { phase: 'lobby', qIndex: -1, total: QUIZ.length } }); }
+  catch(e) { toast('Erro: ' + (e.code || e.message)); }
+}
+
+/* ===================== PARTICIPANTE ===================== */
+function startPlayer(code, name){
+  P = { code, name, state: null, scores: {}, choice: null, ans: null, res: null, qKey: null, un: [], expired: false, err: '' };
+  lsSet('quizia_player', { code, name });
+  const R = p => ref(db, `rooms/${code}/${p}`);
+  onValue(ref(db, '.info/connected'), s => {
+    if (s.val()) { const pr = R('presence/' + uid); onDisconnect(pr).remove(); set(pr, true).catch(()=>{}); }
+  });
+  onValue(R('state'), s => {
+    const st = s.val(); P.state = st;
+    const k = st && st.qKey || null;
+    if (k !== P.qKey) {
+      P.un.forEach(f => f()); P.un = []; P.qKey = k; P.choice = null; P.ans = null; P.res = null; P.expired = false; P.err = '';
+      if (k) {
+        P.un.push(onValue(R(`answers/${k}/${uid}`), a => { P.ans = a.val(); renderPlayer(); }));
+        P.un.push(onValue(R(`results/${k}/${uid}`), r => { P.res = r.val(); renderPlayer(); }));
+      }
+    }
+    renderPlayer();
+  });
+  onValue(R('scores'), s => { P.scores = s.val() || {}; renderPlayer(); });
+  renderPlayer();
+}
+
+function myAnswer(){ return P.ans ? P.ans.c : (P.choice != null ? P.choice : null); }
+async function submitAnswer(c){
+  const st = P.state; if (!st || st.phase !== 'question' || myAnswer() != null) return;
+  P.choice = c; P.err = ''; renderPlayer();
+  try { await set(ref(db, `rooms/${P.code}/answers/${st.qKey}/${uid}`), { c, t: serverTimestamp() }); }
+  catch(e) { P.choice = null; P.err = 'Sua resposta não foi aceita: o tempo acabou ou já havia uma resposta.'; renderPlayer(); }
+}
+function myRank(){ const rk = ranking(P.scores); const me = rk.find(p => p.id === uid); return { me, total: rk.length }; }
+
+function renderPlayer(){
+  if (!P) return;
+  const st = P.state, ph = st && st.phase;
+  const rk = myRank(), score = rk.me ? rk.me.score : 0;
+  const top = `<div class="ptop"><div class="brand" style="font-size:1.2rem">${LOGO}<span>QuizIA</span></div><span class="pill nick">${esc(P.name)}</span></div>`;
+  let body = '';
+  if (!st) body = `<div class="center"><div class="em">🔌</div><h2>Sala indisponível</h2><p>O apresentador pode ter encerrado a sala.</p></div>`;
+  else if (ph === 'lobby') body = `<div class="center"><div class="em">🙌</div><h2>Você está na sala!</h2><p style="color:var(--mut)">Aguarde o apresentador iniciar o quiz</p><p class="dots" style="margin-top:1rem"><span></span><span></span><span></span></p></div>`;
+  else if (ph === 'question' || ph === 'closed') {
+    const mine = myAnswer(), open = ph === 'question' && mine == null && !P.expired;
+    const tiles = st.question.options.map((o,i) => `<button class="tile o${i}${mine===i?' picked':''}" data-c="${i}" ${open?'':'disabled'} style="${!open && mine!=null && mine!==i ? 'opacity:.45' : ''}"><span class="let">${LETTERS[i]}</span><span class="otxt">${esc(o)}</span></button>`).join('');
+    let note = '';
+    if (P.err) note = `<p class="err">${esc(P.err)}</p>`;
+    else if (mine != null && ph === 'question') note = `<p style="text-align:center;font-weight:700;color:var(--d)">✔ Resposta enviada! Aguarde o fim do tempo.</p>`;
+    else if (mine == null && (ph === 'closed' || P.expired)) note = `<p style="text-align:center;font-weight:700;color:#ffb020">⏰ Tempo esgotado. Você não respondeu.</p>`;
+    else if (ph === 'closed') note = `<p style="text-align:center;font-weight:700;color:var(--cyan)">Rodada encerrada. Aguardando a correção…</p>`;
+    body = `<div class="qtop" style="margin:0"><span class="pill">${st.qIndex+1}/${st.total}</span><b id="pTimer" class="disp" style="font-size:2rem">${ph==='question'?st.duration:''}</b></div>
+      <div class="tbar" style="margin:0"><i id="pBar" style="width:${ph==='question'?100:0}%"></i></div>
+      <div class="pq">${esc(st.question.text)}</div><div class="ogrid">${tiles}</div>${note}`;
+  } else if (ph === 'revealed') {
+    const rv = st.reveal, r = P.res || { c: -1, ok: false, pts: 0 };
+    const verdict = r.ok ? `<div class="res ok"><div style="font-size:2.4rem">🎉</div><h2>Acertou!</h2><div class="pts">+${r.pts}</div></div>`
+      : `<div class="res no"><div style="font-size:2.4rem">${r.c < 0 ? '⏰' : '😅'}</div><h2>${r.c < 0 ? 'Sem resposta' : 'Não foi dessa vez'}</h2><div class="pts">+0</div>${r.c >= 0 ? `<p>Você marcou ${LETTERS[r.c]}.</p>` : ''}</div>`;
+    body = `<div class="pq">${esc(st.question.text)}</div>${verdict}
+      <div class="panel"><b>Resposta certa: ${LETTERS[rv.c]}</b> – ${esc(st.question.options[rv.c])}<p style="color:var(--mut);margin-top:.5rem">${esc(rv.e)}</p></div>
+      <div class="panel" style="display:flex;justify-content:space-between;align-items:center"><span>Sua pontuação</span><b class="disp" style="font-size:1.8rem">${score}</b></div>
+      ${rk.me ? `<p style="text-align:center;color:var(--mut)">Você está em ${rk.me.rank}º de ${rk.total}</p>` : ''}`;
+  } else if (ph === 'final') {
+    const medal = rk.me ? ({1:'🥇',2:'🥈',3:'🥉'}[rk.me.rank] || '🏁') : '🏁';
+    body = `<div class="center"><div class="em">${medal}</div><h2>Fim de jogo!</h2>
+      ${rk.me ? `<p style="font-size:1.3rem">Você ficou em <b>${rk.me.rank}º lugar</b> de ${rk.total}</p>` : ''}
+      <p class="disp" style="font-size:2.4rem;margin-top:.5rem">${score} pts</p><p style="color:var(--mut);margin-top:.6rem">Obrigado por jogar!</p></div>`;
+  }
+  app.innerHTML = `<div class="pl">${top}${body}</div>`;
+  app.querySelectorAll('.tile[data-c]').forEach(b => b.onclick = () => submitAnswer(+b.dataset.c));
+}
+
+/* ===================== Relógio (cronômetro compartilhado) ===================== */
+setInterval(() => {
+  if (H && H.state && H.state.phase === 'question') {
+    const st = H.state, ms = st.endsAt - now(), t = $('hTimer');
+    if (t) { t.textContent = Math.max(0, Math.ceil(ms/1000)); t.classList.toggle('warn', ms <= 5000); }
+    if ($('hTbar')) $('hTbar').style.width = clamp(ms / (st.duration*1000) * 100, 0, 100) + '%';
+    if (ms <= -1200 && !H.closing) { H.closing = true; closeRound(); }
+  }
+  if (P && P.state && P.state.phase === 'question') {
+    const st = P.state, ms = st.endsAt - now(), t = $('pTimer');
+    if (t) t.textContent = Math.max(0, Math.ceil(ms/1000));
+    if ($('pBar')) $('pBar').style.width = clamp(ms / (st.duration*1000) * 100, 0, 100) + '%';
+    if (ms <= 0 && !P.expired && myAnswer() == null) { P.expired = true; renderPlayer(); }
+  }
+}, 250);
+
+renderHome();
+</script>
+</body>
+</html>
